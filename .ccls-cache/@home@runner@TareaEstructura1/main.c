@@ -17,15 +17,11 @@ typedef struct tipoPaciente {
 } tipoPaciente;
 
 int totalPacientes = 0;
-
-// Función para limpiar la pantall
 void limpiarPantalla() { system("clear"); }
 
-void strMay(char *cadena) 
-{
+void strMay(char *cadena) {
   int i = 0;
-  while (cadena[i] != '\0')
-    {
+  while (cadena[i] != '\0') {
     cadena[i] = toupper(cadena[i]);
     i++;
   }
@@ -33,10 +29,9 @@ void strMay(char *cadena)
 
 void presioneTeclaParaContinuar() {
   puts("Presione una tecla para continuar...");
-  getchar(); 
+  getchar();
   getchar();
 }
-
 // Menú principal
 void mostrarMenuPrincipal() {
   limpiarPantalla();
@@ -52,114 +47,314 @@ void mostrarMenuPrincipal() {
   puts("6) Salir");
 }
 
-void ordenarPrioridad(List *listaPacientes)
-{
-    bool intercambio;
-    bool igualPrioridad;
-    do {
-      intercambio = false;
-      igualPrioridad = false;
+void ordenarPrioridad(List *listaPacientes) {
+  bool intercambio;
+  bool igualPrioridad;
+  do {
+    intercambio = false;
+    igualPrioridad = false;
 
-      tipoPaciente *pacienteActual = list_first(listaPacientes);
-      tipoPaciente *siguientePaciente = list_next(listaPacientes);
-      while (siguientePaciente != NULL) {
-        if (pacienteActual->prioridad < siguientePaciente->prioridad)
-        {
-          tipoPaciente temp = *pacienteActual;
-          *pacienteActual = *siguientePaciente;
-          *siguientePaciente = temp;
-          intercambio = true;
-        } else if (pacienteActual->prioridad == siguientePaciente->prioridad &&
-                   pacienteActual->hora > siguientePaciente->hora)
-        {
-          tipoPaciente temp = *pacienteActual;
-          *pacienteActual = *siguientePaciente;
-          *siguientePaciente = temp;
-          intercambio = true;
-        }
-        pacienteActual = siguientePaciente;
-        siguientePaciente = list_next(listaPacientes);
+    tipoPaciente *pacienteActual = list_first(listaPacientes);
+    tipoPaciente *siguientePaciente = list_next(listaPacientes);
+    while (siguientePaciente != NULL) {
+      if (pacienteActual->prioridad < siguientePaciente->prioridad) {
+        tipoPaciente temp = *pacienteActual;
+        *pacienteActual = *siguientePaciente;
+        *siguientePaciente = temp;
+        intercambio = true;
+      } else if (pacienteActual->prioridad == siguientePaciente->prioridad &&
+                 pacienteActual->hora > siguientePaciente->hora) {
+        tipoPaciente temp = *pacienteActual;
+        *pacienteActual = *siguientePaciente;
+        *siguientePaciente = temp;
+        intercambio = true;
       }
-    } while (intercambio);
-} 
+      pacienteActual = siguientePaciente;
+      siguientePaciente = list_next(listaPacientes);
+    }
+  } while (intercambio);
+}
 
-void registrar_paciente(List *pacientes)
-{
+void registrar_paciente(List *pacientes) {
   printf("\nRegistrar nuevo paciente \n");
   tipoPaciente *paciente = malloc(sizeof(tipoPaciente));
-  if (paciente == NULL)
-  {
+  if (paciente == NULL) {
     printf("ERROR DE MEMORIA");
     return;
   }
 
-  printf("Ingresa el nombre del paciente: \n");
+  printf("Por favor, introduce el nombre del paciente: \n");
   getchar();
   char nombreIngresado[MAX];
   scanf(" %[^\n]", nombreIngresado);
   strMay(nombreIngresado);
 
   bool encontPaciente = false;
-  tipoPaciente *pacienteActual = list_first(listaPacientes);
-  while (pacienteActual != NULL && !encontPaciente) 
-  {
-    if (strcmp(pacienteActual->nombre, nombreIngresado) == 0)
-    {
-      puts("El paciente ya se encuentra registrado");
+  tipoPaciente *pacienteActual = list_first(pacientes);
+  while (pacienteActual != NULL && !encontPaciente) {
+    if (strcmp(pacienteActual->nombre, nombreIngresado) == 0) {
+      puts("El paciente ya se encuentra en el sistema");
       encontPaciente = true;
       return;
     } else
-      pacienteActual = list_next(listaPacientes);
+      pacienteActual = list_next(pacientes);
   }
-  if (pacienteActual == NULL)
-  { 
+  if (pacienteActual == NULL) {
     strcpy(paciente->nombre, nombreIngresado);
   }
-  printf("Ingresa la edad del paciente: \n");
+  printf("Añadir la edad del paciente: \n");
   scanf("%i", &paciente->edad);
-  printf("Ingresa el sintoma del paciente:\n");
+  printf("Añadir el sintoma del paciente:\n");
   getchar();
   scanf(" %[^\n]", paciente->sintoma);
   strMay(paciente->sintoma);
   strMay(paciente->nombre);
-  paciente->prioridad = 1; 
+  paciente->prioridad = 1;
   time(&paciente->hora);
-  list_pushBack(listaPacientes, paciente);
+  list_pushBack(pacientes, paciente);
   totalPacientes += 1;
-  ordenarPrioridad(listaPacientes);
+  ordenarPrioridad(pacientes);
+}
+
+void mostrar_lista_pacientes(List *listaPacientes)
+{
+  printf("Pacientes en lista de espera: \n");
+  tipoPaciente *pacienteActual = list_first(listaPacientes);
+  if (pacienteActual == NULL) {
+    puts("No se encutran pacientes registrados");
+    return;
+  }
+  puts("=============================================================================");
+  printf("|                          Pacientes en lista de espera: %d                     "
+         "      |\n",
+         totalPacientes);
+  puts("=============================================================================");
+  printf("| %-20s | %-10s | %-25s | %-8s |\n", "Nombres", "Edad", "Sintoma",
+         "Prioridad");
+  puts("=============================================================================");
+  while (pacienteActual != NULL) {
+    char nombre[MAX];
+    strcpy(nombre, pacienteActual->nombre);
+  
+    int edad = pacienteActual->edad;
+  
+    char sintoma[MAX];
+    strcpy(sintoma, pacienteActual->sintoma);
+  
+    int prioridad = pacienteActual->prioridad;
+  
+    printf("| %-20s | %-10d | %-25s |", nombre, edad, sintoma);
+    if (prioridad == 1)
+      printf(" %-9s |\n", "Baja");
+    else if (prioridad == 2)
+      printf(" %-9s |\n", "Media");
+    else if (prioridad == 3)
+      printf(" %-9s |\n", "Alto");
+  
+    pacienteActual = list_next(listaPacientes);
   }
 }
 
-void mostrar_lista_pacientes(List *pacientes) {
-  printf("Pacientes en espera: \n");
-
+int contador_prioridad(List *listaPacientes, int prioridad) 
+{
+  int cont = 0;
+  tipoPaciente *pacienteActual = list_first(listaPacientes);
+  while (pacienteActual != NULL)
+  {
+    if (pacienteActual->prioridad == prioridad)
+    {
+      cont += 1;
+      pacienteActual = list_next(listaPacientes);
+    }
+  }
+  return cont;
 }
 
+void mostrar_lista_prioridad(List *listaPacientes) {
+  int prioriIngresada;
+  bool validPriori = false;
+
+  while (!validPriori) // Bucle solamente para definir y validar el dato
+                       // nuevaPrioridad
+  {
+    printf("\nIngrese el numero de la prioridad que desea mostrar: \n");
+    printf("1) Baja\n");
+    printf("2) Media\n");
+    printf("3) Alta\n");
+    scanf("%i", &prioriIngresada);
+    if (prioriIngresada == 1 || prioriIngresada == 2 || prioriIngresada == 3)
+      validPriori = true;
+    else
+      puts("Prioridad no valida, ingrese nuevamente");
+  }
+
+  int cantPrioridad = contador_prioridad(listaPacientes, prioriIngresada);
+
+  tipoPaciente *pacienteActual = list_first(listaPacientes);
+
+  if (pacienteActual == NULL || cantPrioridad == 0) {
+    puts("No hay pacientes registrados");
+    return;
+  }
+
+  puts("======================================================================="
+       "======");
+  printf("|                          Pacientes en espera: %d                   "
+         "        |\n",
+         cantPrioridad);
+  puts("======================================================================="
+       "======");
+  printf("| %-20s | %-10s | %-25s | %-8s |\n", "Nombres", "Edad", "Sintoma",
+         "Prioridad");
+  puts("======================================================================="
+       "======");
+  while (pacienteActual != NULL) {
+    char nombre[MAX];
+    strcpy(nombre, pacienteActual->nombre);
+
+    int edad = pacienteActual->edad;
+
+    char sintoma[MAX];
+    strcpy(sintoma, pacienteActual->sintoma);
+
+    int prioridad = pacienteActual->prioridad;
+    if (prioridad == prioriIngresada) {
+      printf("| %-20s | %-10d | %-25s |", nombre, edad, sintoma);
+      if (prioridad == 1)
+        printf(" %-9s |\n", "Baja");
+      else if (prioridad == 2)
+        printf(" %-9s |\n", "Media");
+      else if (prioridad == 3)
+        printf(" %-9s |\n", "Alto");
+    }
+
+    pacienteActual = list_next(listaPacientes);
+  }
+}
+
+void asignar_prioridad(List *listaPacientes) {
+  if (totalPacientes == 0) {
+    puts("No hay pacientes registrados");
+    return;
+  }
+  
+  printf("Ingrese el nombre del paciente del cual quiere cambiar prioridad:\n");
+  getchar();
+  char nombrePaciente[MAX];
+  scanf(" %[^\n]", nombrePaciente);
+  strMay(nombrePaciente);
+
+  tipoPaciente *pacienteActual = list_first(listaPacientes);
+
+  while (pacienteActual != NULL)
+  {
+    if (strcmp(pacienteActual->nombre, nombrePaciente) == 0) {
+      break;
+    } else
+      pacienteActual = list_next(listaPacientes);
+    if (pacienteActual == NULL) {
+      puts("No se ha encontrado al paciente");
+      return;
+    }
+  }
+  printf("El paciente tiene prioridad ");
+  if (pacienteActual->prioridad == 1)
+    printf("baja");
+  else if (pacienteActual->prioridad == 2)
+    printf("media");
+  else if (pacienteActual->prioridad == 3)
+    printf("alta");
+  int nuevaPrioridad;
+  bool validPriori = false;
+
+  while (!validPriori) 
+  {
+    printf("\nIngrese el numero de la nueva prioridad: \n");
+    printf("1) Baja\n");
+    printf("2) Media\n");
+    printf("3) Alta\n");
+    scanf("%i", &nuevaPrioridad);
+    if (nuevaPrioridad == 1 || nuevaPrioridad == 2 || nuevaPrioridad == 3)
+      validPriori = true;
+    else
+      puts("Prioridad no valida, ingrese nuevamente");
+  }
+
+  bool cambGuard = false;
+  if (pacienteActual->prioridad == nuevaPrioridad) {
+    puts("No se ha hecho ningun cambio");
+  }
+
+  else {
+    pacienteActual->prioridad = nuevaPrioridad;
+    puts("Se han guardado los cambios");
+  }
+
+  ordenarPrioridad(listaPacientes);
+}
+
+void siguiente_paciente(List *listaPacientes) {
+  puts("¿Desea pasar al siguiente en la lista de espera?");
+  puts("Y/N");
+  getchar();
+
+  char confirmacion;
+  bool confirmado = false;
+
+  while (!confirmado) {
+    scanf(" %c", &confirmacion);
+    confirmacion = toupper(confirmacion);
+
+    if (confirmacion != 'Y' && confirmacion != 'N') {
+      puts("Respuesta no valida");
+      puts("Intente de nuevo:");
+      while (getchar() != '\n');
+
+    } else if (confirmacion == 'N') {
+      puts("Acción cancelada");
+      return;
+    } else {
+      confirmado = true;
+    }
+  }
+  tipoPaciente *pacienteActual = list_first(listaPacientes);
+  if (pacienteActual == NULL)
+  { 
+    puts("No hay pacientes registrados");
+    return;
+  }
+  puts("\nPaciente atendido:");
+  printf("Nombre Paciente: %s\n", pacienteActual->nombre);
+  printf("Edad: %i\n", pacienteActual->edad);
+  printf("Sintoma: %s\n", pacienteActual->sintoma);
+
+  list_popFront(listaPacientes);
+  totalPacientes -= 1;
+  puts("Se ha continuado con el siguiente paciente");
+  printf("Pacientes restantes: %i\n", totalPacientes);
+}
 int main() {
   char opcion;
-  List *pacientes =
-      list_create(); 
-
+  List *listaPacientes = list_create();
   do {
     mostrarMenuPrincipal();
     printf("Ingrese su opción: ");
-    scanf(" %c", &opcion); 
-
+    scanf(" %c", &opcion);
     switch (opcion) {
     case '1':
-      registrar_paciente(pacientes);
+      registrar_paciente(listaPacientes);
       break;
     case '2':
-
+      asignar_prioridad(listaPacientes);
       break;
     case '3':
-      mostrar_lista_pacientes(pacientes);
+      mostrar_lista_pacientes(listaPacientes);
       break;
     case '4':
-
+      siguiente_paciente(listaPacientes);
       break;
     case '5':
-
+      mostrar_lista_prioridad(listaPacientes);
       break;
     case '6':
       puts("Saliendo del sistema de gestión hospitalaria...");
@@ -170,9 +365,6 @@ int main() {
     presioneTeclaParaContinuar();
 
   } while (opcion != '6');
-
-
-  list_clean(pacientes);
-
+  list_clean(listaPacientes);
   return 0;
 }
